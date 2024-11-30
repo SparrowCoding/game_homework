@@ -1,0 +1,19 @@
+#include <stdio.h>
+
+int main() {
+	int x, y, z;
+	int a[10][10][10];
+
+	scanf("%d %d %d", &a[x][y][z]);
+	for (int twoz = 0; twoz <= a[z]; twoz++) {
+		for (int ix = 0; ix <= a[x]; ix++) {
+			scanf("%s");
+		}
+		for (int iy = 0; iy <= a[y]; iy++) {
+			scanf("%s");
+		}
+	}
+
+	
+}
+

@@ -1,0 +1,115 @@
+#include <stdio.h>
+#define MOD 1000000  // 큐의 크기를 제한하는 MOD 값 정의
+
+// 3차원 배열로 토마토 상자의 상태를 저장하는 배열
+int map[101][101][101];
+// 3차원 배열로 방문 여부를 체크하는 배열
+int visit[101][101][101];
+int N, M, H; // N: 세로 크기, M: 가로 크기, H: 높이 (상자의 크기)
+
+// 큐에 사용할 구조체, 좌표 (x, y, z)를 저장
+typedef struct n {
+    int x;
+    int y;
+    int z;
+}q;
+
+// 큐를 저장하는 배열과 front, rear (큐의 앞, 뒤)
+q queue[1000001];
+int front, rear, max; // 큐의 front와 rear, 그리고 최대 일수
+int tomato = 0; // 익지 않은 토마토의 개수를 저장
+
+// 이동 방향을 저장하는 배열 (상, 하, 좌, 우, 전, 후)
+int vectX[6] = { 0,0,1,-1,0,0 };
+int vectY[6] = { 1,-1,0,0,0,0 };
+int vectZ[6] = { 0,0,0,0,1,-1 };
+
+// 큐에 새로운 좌표 (x, y, z)를 삽입하는 함수
+void enque(int x, int y, int z)
+{
+    q temp; // 좌표 정보를 임시로 저장할 구조체 변수
+    temp.x = x;
+    temp.y = y;
+    temp.z = z;
+    queue[rear++ % MOD] = temp; // 큐의 rear에 좌표를 삽입하고 rear 값 증가
+}
+
+// 큐에서 좌표를 꺼내는 함수
+q deque()
+{
+    return queue[front++ % MOD]; // 큐의 front에서 좌표를 반환하고 front 값 증가
+}
+
+// 큐가 비어있는지 확인하는 함수
+int isEmpty()
+{
+    if (front == rear) // front와 rear가 같으면 큐가 비어있음
+        return 0; // 비어있으면 0 반환
+    else
+        return 1; // 비어있지 않으면 1 반환
+}
+
+// BFS 탐색을 수행하는 함수
+int bfs()
+{
+    int nextX, nextY, nextZ; // 다음에 이동할 좌표
+    while (isEmpty()) // 큐가 비어있지 않은 동안 반복
+    {
+        q pop = deque(); // 큐에서 좌표를 꺼냄
+
+        // 6방향으로 이동 (상, 하, 좌, 우, 전, 후)
+        for (int i = 0; i < 6; i++)
+        {
+            nextX = pop.x + vectX[i]; // 새로운 x 좌표
+            nextY = pop.y + vectY[i]; // 새로운 y 좌표
+            nextZ = pop.z + vectZ[i]; // 새로운 z 좌표
+
+            // 좌표가 상자 범위 안에 있는지 확인
+            if (nextX >= 0 && nextX < N && nextY >= 0 && nextY < M && nextZ >= 0 && nextZ < H)
+            {
+                // 익지 않은 토마토이고 방문하지 않은 곳이면
+                if (map[nextX][nextY][nextZ] == 0 && visit[nextX][nextY][nextZ] == 0)
+                {
+                    visit[nextX][nextY][nextZ] = visit[pop.x][pop.y][pop.z] + 1; // 현재 위치에서 +1 일수로 방문
+                    enque(nextX, nextY, nextZ); // 큐에 새로운 좌표 삽입
+                    tomato--; // 익지 않은 토마토 개수 감소
+                }
+                // 현재까지의 최대 일수를 갱신
+                if (visit[nextX][nextY][nextZ] > max)
+                    max = visit[nextX][nextY][nextZ];
+            }
+        }
+    }
+    if (tomato == 0) // 익지 않은 토마토가 모두 익었으면
+        return max; // 최대 일수 반환
+    else
+        return -1; // 아직 익지 않은 토마토가 남아 있으면 -1 반환
+}
+
+// 프로그램의 시작점
+int main()
+{
+    scanf("%d %d %d", &M, &N, &H); // 가로(M), 세로(N), 높이(H) 입력
+    for (int h = 0; h < H; h++) // 높이(H) 만큼 반복
+    {
+        for (int i = 0; i < N; i++) // 세로(N) 만큼 반복
+        {
+            for (int j = 0; j < M; j++) // 가로(M) 만큼 반복
+            {
+                scanf("%d", &map[i][j][h]); // 토마토 상태 입력
+                if (map[i][j][h] == 1) { // 익은 토마토인 경우
+                    enque(i, j, h); // 큐에 좌표 삽입
+                    visit[i][j][h] == 1; // 방문 처리
+                }
+                if (map[i][j][h] == 0) // 익지 않은 토마토인 경우
+                    tomato++; // 익지 않은 토마토 개수 증가
+            }
+        }
+    }
+    if (tomato == 0) // 익지 않은 토마토가 없으면
+        printf("0"); // 0 출력
+    else
+        printf("%d", bfs()); // bfs를 통해 최소 일수를 계산하고 출력
+
+    return 0; // 프로그램 종료
+}
