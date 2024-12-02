@@ -1,9 +1,8 @@
-﻿#include <stdio.h>
+#include <stdio.h>
 #include <Windows.h>
 #include <conio.h>
-#include <stdlib.h>
-#include <math.h>
-#include "change.h"
+
+
 
 #define WIDTH 30
 #define HEIGHT 38 
@@ -11,20 +10,51 @@
 #define UY 45
 #define UZ 45
 #define CLS system("cls")
+#define MAX_RANK 5
 
-int activeBuffer = 0;
+
+
+//textcolor 함수 숫자를 통해 색을 넣을수있다.
 void textcolor(int colorNum) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), colorNum);
 }
 
+
+int mogsuk = 3;
 int score = 0;
-typedef struct total
-{
+typedef struct {
     char name[30];
-    int totalPoint;
-    int totalTime;
-    char totalname;
+    int score;
+} Player;
+
+Player rankingList[MAX_RANK] = { //랭킹에 아무도 없으면 허전하니간 넣는 리스트
+    {"홍길동", 100},
+    {"장영석", 94},
+    {"둘명박", 80},
+    {"언철수", 70},
+    {"곰재인", 60}
 };
+void update(const char* name, int score) {
+    Player newPlayer;
+    strcpy(newPlayer.name, name); // 입력된 이름을 새 플레이어 구조체에 복사하는 코드
+    newPlayer.score = score;      
+
+    rankingList[MAX_RANK - 1] = newPlayer;
+
+    // 랭킹을 점수 기준으로 그시기 정렬하는 코드
+    for (int i = MAX_RANK - 1; i > 0; i--) {
+        
+        if (rankingList[i].score > rankingList[i - 1].score) {
+            Player temp = rankingList[i];       
+            rankingList[i] = rankingList[i - 1]; 
+            rankingList[i - 1] = temp;          
+        }
+        else {
+            break;
+        }
+    }
+}
+
 void removeCursor(void) {
     CONSOLE_CURSOR_INFO cursor;
     HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE); 
@@ -37,12 +67,6 @@ void gotoxy(int x, int y) {
     COORD pos = { x, y }; // COORD 구조체
     HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleCursorPosition(handle, pos); // * 를 움직이게 해주는 핸들.
-}
-void gamestart() {
-    CLS;
-    printf("게임을 시작합니다...\n");
-    Sleep(1000);
-    CLS;
 }
 void ranking() {
     CLS;
@@ -66,31 +90,11 @@ void ranking() {
     printf("       랭킹 시스템       ");
     gotoxy(10, 17);
     printf("=========================================================");
-
-    gotoxy(15, 19);
-    printf("등수\t이름\t\t점수");
-    gotoxy(15, 20);
-    printf("---------------------------------------------");
-
-    textcolor(14);
-    gotoxy(15, 22);
-    printf("1등\t홍길동\t\t100점");
-
-    textcolor(8);
-    gotoxy(15, 23);
-    printf("2등\t김철수\t\t90점");
-
-    textcolor(11);
-    gotoxy(15, 24);
-    printf("3등\t이영희\t\t80점");
-
     textcolor(7);
-    gotoxy(15, 25);
-    printf("4등\t최민호\t\t70점");
-
-    gotoxy(15, 26);
-    printf("5등\t박지수\t\t60점");
-
+    for (int i = 0; i < MAX_RANK; i++) {
+        gotoxy(15, 22 + i);
+        printf("%d등    %s   %d점", i + 1, rankingList[i].name, rankingList[i].score);
+    }
     textcolor(6);
     gotoxy(10, 28);
     printf("=========================================================");
@@ -103,10 +107,12 @@ void ranking() {
 }
 void help() {
     CLS;
-
-    printf("도움말: wasd로 *를 움직입니다.\n");
-    printf("w: 위로 이동, a: 왼쪽 이동, s: 아래로 이동, d: 오른쪽 이동\n");
-    printf("메뉴로 돌아가려면 아무 키나 누르세요...\n");
+    gotoxy(40, 14);
+    printf("도움말: wasd로 *를 움직입니다.");
+    gotoxy(30, 20);
+    printf("w: 위로 이동, a: 왼쪽 이동, s: 아래로 이동, d: 오른쪽 이동 q: 메뉴로 돌아가기 단 게임 점수는 저장안됨");
+    gotoxy(35, 26);
+    printf("메뉴로 돌아가려면 아무 키나 누르세요...");
     getch();
     CLS;
 }
@@ -156,7 +162,7 @@ void StartMenu() {
         printf("=====================");
 
         input = _getch();
-        if (input == 'w' || input == 'W') {
+        if (input == 'w' || input == 'W') {//w랑 대문자 W를 다르게 인식하므로 둘다 || or로 인식하게 하였다.
             if (choice > 1) {
                 choice--;
             }
@@ -169,8 +175,7 @@ void StartMenu() {
         else if (input == '\r') {
             switch (choice) {
             case 1:
-                gamestart();
-                gameLoop();
+                gamemainLoop();
                 break;
             case 2:
                 help();
@@ -181,89 +186,90 @@ void StartMenu() {
             case 4:
                 textcolor(7);
                 printf("게임을 종료합니다.\n");
-                return;
+                return 0;
+                
             }
         }
     }
 }
 
 
-
-
-
-
-
-void enemy(int x, int y) {
-    printf("==================");
-    gotoxy(0, 0);
-
+void drawWall(int wallX, int wallY) {
+    gotoxy(wallX, wallY);
+    printf("\033[0;31m###\033[0;31m");
 }
 
 void death(int score) {
     CLS;
     gotoxy(30, 15);
     printf("게임 오버!");
+    gotoxy(30, 16);
+    textcolor(7);
+    printf(" * 랭킹에 당신의 점수가 기재 됩니다 *  ");
     gotoxy(30, 17);
     printf("당신의 점수는 %d점 입니다.", score);
     gotoxy(30, 19);
-    printf("이름을 입력해주세요: ");
-
-    char playerName[30];
-    scanf("%s", playerName);
-
-    gotoxy(30, 21);
-    printf("메뉴로 돌아가려면 아무 키나 누르세요...");
-    getch();
-
-    CLS;
-    StartMenu(); // 메인 메뉴로 돌아가기
+    char name[30];
+    printf("이름을 입력해주세요: ");  scanf("%s", name);
+    update(name, score);
+ 
+    StartMenu();
 }
-void space(int score, int mogsuk) {
-    gotoxy(45, 0);
-    printf("점수: %d", score);
-    gotoxy(15, 0);
-    printf("목숨: ");
-    for (int i = 0; i < mogsuk; i++) {
-        printf("$");
+void check(int playerX, int playerY, int wallX, int wallY) {
+    
+    if (playerX >= wallX && playerX < wallX + 3 && playerY == wallY) {
+        mogsuk--;
+        if (mogsuk <= 0) {
+            death(score);
+
+        }
     }
 }
-void gameLoop() {
+int gamemainLoop() {
+    CLS;
+    srand(time(NULL)); 
     char xy = 0;
-    int x = 10, y = 10;
+    int x = 15, y = 30; 
     int prevX = x, prevY = y;
-    int mogsuk = 3;
-    int score = 0;
+    int wallX[5]; 
+    int wallY[5] = { 1, 1, 1, 1, 1 };
 
-    char screenBuffer[HEIGHT][WIDTH];
-
-    removeCursor();
-
+    
+    for (int i = 0; i < 5; i++) {
+        wallX[i] = rand() % (WIDTH - 3) + 1;
+    }
 
     while (1) {
-        
+        CLS;  
+
+        for (int i = 0; i < 5; i++) {
+            drawWall(wallX[i], wallY[i]);
+            wallY[i]++;  
+
+            if (wallY[i] >= HEIGHT) {
+                wallY[i] = 1;
+                wallX[i] = rand() % (WIDTH - 3) + 1;  
+            }
+            check(x, y, wallX[i], wallY[i]);
+            score++;
+        }
+
         gotoxy(prevX, prevY);
         printf(" ");
 
-        
         gotoxy(x, y);
-        printf("*");
+        printf("\033[0;33m*\033[0;33m");
 
         
         gotoxy(0, HEIGHT);
-        printf("점수: %d    목숨: ", score);
+        printf("\033[0;37m점수: %d\033[0;37m", score);
+        gotoxy(26, HEIGHT);
+        printf("\033[0;37m목숨:\033[0;37m");
         for (int i = 0; i < mogsuk; i++) {
-            
-            printf("♥️");
+            printf("\033[0;32m$\033[0;32m");
         }
 
-        if (mogsuk == 0) {
-            break;
-            death(score);
-            break;
-        }
-
-        
-        if (_kbhit()) {
+        if (_kbhit()) {  
             xy = _getch();
             prevX = x;
             prevY = y;
@@ -281,15 +287,20 @@ void gameLoop() {
             case 'd':
                 if (x < WIDTH - 2) x++;
                 break;
+            case 'q':
+                StartMenu();//저장 안됨
+            case 'l':
+                mogsuk = 0;
+                score = 45;
             }
+
         }
 
-        Sleep(50);
+        Sleep(20);  
     }
+
+  
 }
-
-
-
 
 
 int main() {
@@ -298,6 +309,6 @@ int main() {
     return 0;
 }
 
-//메인에서 스타트 누르면 호출 탈출할수있는 기능 넣기 
+// 메인에서 스타트 누르면 호출 탈출할수있는 기능 넣기 
 // 다시 메인으로 돌아갈수있게 제작하기
 // 메인으로 뭔가 키로 받아서 점수 보기
