@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <Windows.h>
 #include <conio.h>
-
-
+#include <stdlib.h>
 
 #define WIDTH 30
 #define HEIGHT 38 
@@ -11,8 +10,6 @@
 #define UZ 45
 #define CLS system("cls")
 #define MAX_RANK 5
-
-
 
 //textcolor 함수 숫자를 통해 색을 넣을수있다.
 void textcolor(int colorNum) {
@@ -27,8 +24,8 @@ typedef struct {
     int score;
 } Player;
 
-Player rankingList[MAX_RANK] = { //랭킹에 아무도 없으면 허전하니간 넣는 리스트
-    {"홍길동", 100},
+Player rankingList[MAX_RANK] = { //랭킹에 아무도 없으면 구분이 안된다고 생각해서 넣는 리스트
+    {"김성은의 최대 점수", 7325},
     {"장영석", 94},
     {"둘명박", 80},
     {"언철수", 70},
@@ -50,12 +47,12 @@ void update(const char* name, int score) {
             rankingList[i - 1] = temp;          
         }
         else {
-            break;
+            break;//아닐시 브릭
         }
     }
 }
 
-void removeCursor(void) {
+void removeCursor(void) {//게임할때 거슬리는 커서 지우는 코드.
     CONSOLE_CURSOR_INFO cursor;
     HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE); 
     GetConsoleCursorInfo(handle, &cursor);
@@ -94,6 +91,7 @@ void ranking() {
     for (int i = 0; i < MAX_RANK; i++) {
         gotoxy(15, 22 + i);
         printf("%d등    %s   %d점", i + 1, rankingList[i].name, rankingList[i].score);
+        //raking 리스트에서 불러와서 순서대로 나열하기
     }
     textcolor(6);
     gotoxy(10, 28);
@@ -111,12 +109,15 @@ void help() {
     printf("도움말: wasd로 *를 움직입니다.");
     gotoxy(30, 20);
     printf("w: 위로 이동, a: 왼쪽 이동, s: 아래로 이동, d: 오른쪽 이동 q: 메뉴로 돌아가기 단 게임 점수는 저장안됨");
-    gotoxy(35, 26);
+    gotoxy(40, 23);
+    printf("q: 메뉴로 돌아가기 단 게임 점수는 저장안됨, l: 자살하는 키 저장됨");
+    gotoxy(45, 26);
     printf("메뉴로 돌아가려면 아무 키나 누르세요...");
-    getch();
+    getch();//아무키나 입력하면 넘어가지는 코드.
     CLS;
 }
 void StartMenu() {
+    SetConsoleTitle(TEXT("brick pihagi"));// cmd창 이름 바꾸는 명령어 window.h 기능 중에 하나
     CLS;
     int choice = 1;
     char input;
@@ -126,7 +127,9 @@ void StartMenu() {
         gotoxy(10, 2);
         textcolor(7);
         printf("■■ 시작하기 전에 최대화 버튼을 눌러 콘솔창을 제일 크게 만들어 주십시오. ■■");
-        gotoxy(30, 4);
+        gotoxy(10, 3);
+        printf("한국어로 설정되어있으면 게임과 움직이지 않습니다. W와 S로 커서를 움직이고 엔터로 원하는 설정에 들어가세요");
+        gotoxy(30, 5);
         textcolor(9);
         printf("===== 게임 메뉴 =====");
 
@@ -186,7 +189,7 @@ void StartMenu() {
             case 4:
                 textcolor(7);
                 printf("게임을 종료합니다.\n");
-                return 0;
+                exit(0);
                 
             }
         }
@@ -205,7 +208,7 @@ void death(int score) {
     printf("게임 오버!");
     gotoxy(30, 16);
     textcolor(7);
-    printf(" * 랭킹에 당신의 점수가 기재 됩니다 *  ");
+    printf(" * 랭킹에 당신의 점수가 기재 됩니다 * ");
     gotoxy(30, 17);
     printf("당신의 점수는 %d점 입니다.", score);
     gotoxy(30, 19);
@@ -213,6 +216,8 @@ void death(int score) {
     printf("이름을 입력해주세요: ");  scanf("%s", name);
     update(name, score);
  
+    score = 0;
+    mogsuk = 3;
     StartMenu();
 }
 void check(int playerX, int playerY, int wallX, int wallY) {
@@ -221,7 +226,7 @@ void check(int playerX, int playerY, int wallX, int wallY) {
         mogsuk--;
         if (mogsuk <= 0) {
             death(score);
-
+           
         }
     }
 }
@@ -233,7 +238,8 @@ int gamemainLoop() {
     int prevX = x, prevY = y;
     int wallX[5]; 
     int wallY[5] = { 1, 1, 1, 1, 1 };
-
+    score = 0;     // 게임 시작 시 점수 초기화해야하므로 넣음
+    mogsuk = 3;
     
     for (int i = 0; i < 5; i++) {
         wallX[i] = rand() % (WIDTH - 3) + 1;
@@ -290,25 +296,23 @@ int gamemainLoop() {
             case 'q':
                 StartMenu();//저장 안됨
             case 'l':
-                mogsuk = 0;
-                score = 45;
+                death(score);
             }
 
         }
-
-        Sleep(20);  
+        Sleep(5);  
     }
 
   
 }
 
 
+
+
+
 int main() {
+    
     removeCursor();
     StartMenu();
     return 0;
 }
-
-// 메인에서 스타트 누르면 호출 탈출할수있는 기능 넣기 
-// 다시 메인으로 돌아갈수있게 제작하기
-// 메인으로 뭔가 키로 받아서 점수 보기
