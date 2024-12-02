@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="리소스 파일\backjoon">
-      <UniqueIdentifier>{60b82b04-9fae-47a3-9fe6-49120116af34}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Test.c">
@@ -23,16 +20,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="FileName.txt">
-      <Filter>리소스 파일\backjoon</Filter>
-    </Text>
-    <Text Include="7569_tomato.txt">
-      <Filter>리소스 파일\backjoon</Filter>
-    </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="FileName123.txt">
-      <Filter>리소스 파일\backjoon</Filter>
-    </None>
+    <ClInclude Include="change.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

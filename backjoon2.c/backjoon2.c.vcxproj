@@ -133,11 +133,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="7569_tomato.txt" />
-    <Text Include="FileName.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="FileName123.txt" />
+    <ClInclude Include="change.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
