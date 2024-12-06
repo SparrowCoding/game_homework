@@ -1,37 +1,35 @@
 #include <stdio.h>
 #include <Windows.h>
 #include <conio.h>
-#include <stdlib.h>
+#include <stdlib.h>//오직 강제종료 exit를 위해서 라이브러리 삽입
 
 #define WIDTH 30
 #define HEIGHT 38 
-#define UX 30 
-#define UY 45
-#define UZ 45
 #define CLS system("cls")
 #define MAX_RANK 5
 
 //textcolor 함수 숫자를 통해 색을 넣을수있다.
-void textcolor(int colorNum) {
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), colorNum);
+void textcolor(int Num) {
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), Num);//색을 고르게 해주는 포인터
 }
 
-
+//목숨이랑 스코어는 전역변수로 선언
 int mogsuk = 3;
 int score = 0;
+
 typedef struct {
     char name[30];
     int score;
 } Player;
 
 Player rankingList[MAX_RANK] = { //랭킹에 아무도 없으면 구분이 안된다고 생각해서 넣는 리스트
-    {"김성은의 최대 점수", 7325},
-    {"장영석", 94},
+    {"제작자의 최대 점수", 8684},
+    {"강한수염", 94},
     {"둘명박", 80},
     {"언철수", 70},
     {"곰재인", 60}
 };
-void update(const char* name, int score) {
+void update(const char* name, int score) {//const char 문자열 포인터, char* 과 다르게 const char*는 문자열 상수를 가르키지만 대신에 다른값을 덮을수 없다.
     Player newPlayer;
     strcpy(newPlayer.name, name); // 입력된 이름을 새 플레이어 구조체에 복사하는 코드
     newPlayer.score = score;      
@@ -91,7 +89,7 @@ void ranking() {
     for (int i = 0; i < MAX_RANK; i++) {
         gotoxy(15, 22 + i);
         printf("%d등    %s   %d점", i + 1, rankingList[i].name, rankingList[i].score);
-        //raking 리스트에서 불러와서 순서대로 나열하기
+        //ranking 리스트에서 불러와서 순서대로 나열하기
     }
     textcolor(6);
     gotoxy(10, 28);
@@ -110,7 +108,7 @@ void help() {
     gotoxy(30, 20);
     printf("w: 위로 이동, a: 왼쪽 이동, s: 아래로 이동, d: 오른쪽 이동 q: 메뉴로 돌아가기 단 게임 점수는 저장안됨");
     gotoxy(40, 23);
-    printf("q: 메뉴로 돌아가기 단 게임 점수는 저장안됨, l: 자살하는 키 저장됨");
+    printf("q: 메뉴로 돌아가기 단 게임 점수는 저장안됨, l: 자살하는 키 (랭킹에 점수 저장 가능)");
     gotoxy(45, 26);
     printf("메뉴로 돌아가려면 아무 키나 누르세요...");
     getch();//아무키나 입력하면 넘어가지는 코드.
@@ -165,7 +163,7 @@ void StartMenu() {
         printf("=====================");
 
         input = _getch();
-        if (input == 'w' || input == 'W') {//w랑 대문자 W를 다르게 인식하므로 둘다 || or로 인식하게 하였다.
+        if (input == 'w' || input == 'W') { //w랑 대문자 W를 다르게 인식하므로 둘다 || or로 인식하게 하였다.
             if (choice > 1) {
                 choice--;
             }
@@ -297,21 +295,19 @@ int gamemainLoop() {
                 StartMenu();//저장 안됨
             case 'l':
                 death(score);
+            case 'p'://제작자 치트키
+                mogsuk = 30;
             }
 
         }
-        Sleep(5);  
+        Sleep(8);  
     }
 
   
 }
 
 
-
-
-
 int main() {
-    
     removeCursor();
     StartMenu();
     return 0;
